@@ -11,7 +11,8 @@
   "author": "Stitch",
   "license": "ISC",
   "dependencies": {
-    "@babel/polyfill": "^7.4.4"
+    "@babel/polyfill": "^7.4.4",
+    "@egjs/view360": "^3.2.2"
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
