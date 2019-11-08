@@ -16,6 +16,8 @@ class PanoramaBanner extends PanoViewer {
       },
       pitchRange: [-20, 20]
     });
+    this.setHotspotOffset = this.setHotspotOffset.bind(this);
+    this.setHotspotOffsets = this.setHotspotOffsets.bind(this)
     this.container = container;
     this.hotspots = Array.prototype.slice.call(options.hotspots);
     this.on('ready', this.onReady.bind(this));
@@ -25,8 +27,8 @@ class PanoramaBanner extends PanoViewer {
   }
 
   onReady() {
+    this.lookAt({ fov: 65 }, 500);
     this.setHotspotOffsets();
-    this.lookAt({ fov: 80 });
   }
 
   onResize() {
@@ -42,15 +44,15 @@ class PanoramaBanner extends PanoViewer {
   }
 
   rotate(point, deg) {
-    const rad = this.getRadian(deg);
-    const cos = Math.cos(rad);
-    const sin = Math.sin(rad);
+    let rad = this.getRadian(deg);
+    let cos = Math.cos(rad);
+    let sin = Math.sin(rad);
     return [cos * point[0] - sin * point[1], sin * point[0] + cos * point[1]];
   }
 
-  setHotspotOffset(hotspot, viewer) {
-    const oyaw = viewer.getYaw();
-    const opitch = viewer.getPitch();
+  setHotspotOffset(hotspot) {
+    const oyaw = this.getYaw();
+    const opitch = this.getPitch();
     const yaw = parseFloat(hotspot.getAttribute("data-yaw"));
     const pitch = parseFloat(hotspot.getAttribute("data-pitch"));
     let deltaYaw = yaw - oyaw;
@@ -69,7 +71,7 @@ class PanoramaBanner extends PanoViewer {
     const radYaw = this.getRadian(deltaYaw);
     const radPitch = this.getRadian(deltaPitch);
 
-    const fov = viewer.getFov();
+    const fov = this.getFov();
     const hfov = this.getHFov(fov);
 
     const rx = Math.tan(this.getRadian(hfov) / 2);
@@ -92,15 +94,15 @@ class PanoramaBanner extends PanoViewer {
     point[1] = this.rotate(point, deltaYaw > 0 ? -10 : 10)[1];
 
     // point[0] = 1.05;
-    const left = viewer._width / 2 + point[0] * viewer._width / 2;
-    const top = viewer._height / 2 + point[1] * viewer._height / 2;
+    const left = this._width / 2 + point[0] * this._width / 2;
+    const top = this._height / 2 + point[1] * this._height / 2;
 
     //hotspot.style.transform = "translate(" + left + "px, " + top + "px) translate(-50%, -50%)";
-    hotspot.style.transform = `translate(${left}px, ${top}px) translate(-50%, -50%)`;
+    hotspot.style.transform = `translate3d(${left}px, ${top}px, 0) rotate(45deg)`;
   }
 
   setHotspotOffsets() {
-    this.hotspots.forEach(hotspot => this.setHotspotOffset(hotspot, this));
+    this.hotspots.forEach(hotspot => this.setHotspotOffset(hotspot));
   }
 }
 
