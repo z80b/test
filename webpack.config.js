@@ -108,7 +108,7 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: "Bannermaker 2.0",
       template: __dirname + "/src/index.html",
-      filename: __dirname + "/dist//index.html"
+      filename: __dirname + "/index.html"
     })
   ]
 };
