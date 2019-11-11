@@ -12,12 +12,14 @@
   "license": "ISC",
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
-    "@egjs/view360": "^3.2.2"
+    "@egjs/view360": "^3.2.2",
+    "photo-sphere-viewer": "^3.5.1"
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
     "@babel/core": "7.4.5",
     "@babel/preset-env": "^7.4.5",
+    "autoprefixer": "^9.7.1",
     "autoprefixer-stylus": "^1.0.0",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "10.0.2",
@@ -26,11 +28,17 @@
     "cssnano": "^4.1.10",
     "ejs-template-loader": "^2.0.0",
     "express": "^4.17.1",
+    "fibers": "^4.0.2",
     "file-loader": "4.0.0",
     "html-webpack-plugin": "^3.2.0",
     "mini-css-extract-plugin": "^0.8.0",
+    "node-sass": "^4.13.0",
     "optimize-css-assets-webpack-plugin": "^5.0.3",
+    "postcss-loader": "^3.0.0",
     "raw-loader": "^3.1.0",
+    "sass": "^1.23.3",
+    "sass-loader": "^8.0.0",
+    "scss-loader": "0.0.1",
     "style-loader": "1.0.0",
     "stylus": "0.54.7",
     "stylus-loader": "3.0.2",

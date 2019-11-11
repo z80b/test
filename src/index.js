@@ -1,117 +1,73 @@
-import { PanoViewer } from '@egjs/view360';
+import PhotoSphereViewer from 'photo-sphere-viewer';
+import 'photo-sphere-viewer/src/scss/photo-sphere-viewer.scss';
 import '@css/index.styl';
 
-class PanoramaBanner extends PanoViewer {
-  constructor(el, options) {
-    // this.container = el.querySelector('.panoviewer__body');
-    const image = el.getAttribute('data-image');
-    const container = el.querySelector('.panoviewer__body');
-    super(container, {
-      ...options,
-      image: image,
-      cubemapConfig: {
-        tileConfig: { flipHorizontal: true, rotation: 0 },
-        order: "RLUDBF",
-        // order: "FBUDRL",
-      },
-      pitchRange: [-20, 20]
+class PanoramaBanner {
+  constructor(el, options = {}) {
+    this.$el = typeof(el) == 'string' ? document.querySelector(el) : el;
+    options.container = this.createBody(this.$el);
+    options.panorama = this.$el.getAttribute('data-image');
+    options.markers = [...options.markers, ...this.getMarkers()];
+    options.hoveringMarker = this.onOverMarker.bind(this);
+    // options.markers = [
+    //   {
+    //     // html marker with custom style
+    //     id: 'text',
+    //     longitude: 0,
+    //     latitude: 0,
+    //     html: '<div class="panorama-banner__marker">1</div>',
+    //     anchor: 'bottom right',
+    //   },
+    // ];
+    console.log('constructor:', options);
+    this.photoSphereViewer = new PhotoSphereViewer(options);
+    this.photoSphereViewer.on('over-marker', (event) => {
+      console.log(event);
+      event.$el.className += ' hovered';
     });
-    this.setHotspotOffset = this.setHotspotOffset.bind(this);
-    this.setHotspotOffsets = this.setHotspotOffsets.bind(this)
-    this.container = container;
-    this.hotspots = Array.prototype.slice.call(options.hotspots);
-    this.on('ready', this.onReady.bind(this));
-    this.on('viewChange', this.setHotspotOffsets.bind(this));
-    window.addEventListener('resize', this.onResize.bind(this));
-    console.log('PanoramaBanner:', this);
-  }
-
-  onReady() {
-    this.lookAt({ fov: 65 }, 500);
-    this.setHotspotOffsets();
-  }
-
-  onResize() {
-    this.updateViewportDimensions();
-    this.setHotspotOffsets();
-  }
-
-  getRadian(deg) { return deg * Math.PI / 100 }
-
-  getHFov(fov) {
-    const rect = this.container.getBoundingClientRect();
-    return Math.atan(rect.width / rect.height * Math.tan(this.getRadian(fov) / 2)) / Math.PI * 360;
-  }
-
-  rotate(point, deg) {
-    let rad = this.getRadian(deg);
-    let cos = Math.cos(rad);
-    let sin = Math.sin(rad);
-    return [cos * point[0] - sin * point[1], sin * point[0] + cos * point[1]];
-  }
-
-  setHotspotOffset(hotspot) {
-    const oyaw = this.getYaw();
-    const opitch = this.getPitch();
-    const yaw = parseFloat(hotspot.getAttribute("data-yaw"));
-    const pitch = parseFloat(hotspot.getAttribute("data-pitch"));
-    let deltaYaw = yaw - oyaw;
-    let deltaPitch = pitch - opitch;
-
-    if (deltaYaw < -180) {
-        deltaYaw += 360;
-    } else if (deltaYaw > 180) {
-        deltaYaw -= 360;
-    }
-    if (Math.abs(deltaYaw) > 90) {
-        hotspot.style.transform = "translate(-200px, 0px)";
-        return;
-    }
-    
-    const radYaw = this.getRadian(deltaYaw);
-    const radPitch = this.getRadian(deltaPitch);
-
-    const fov = this.getFov();
-    const hfov = this.getHFov(fov);
-
-    const rx = Math.tan(this.getRadian(hfov) / 2);
-    const ry = Math.tan(this.getRadian(fov) / 2);
-
-
-    let point = [
-        Math.tan(-radYaw) / rx,
-        Math.tan(-radPitch) / ry,
-    ];
-
-    // console.log('setHotspotOffset:', deltaYaw, deltaPitch, radYaw, radPitch);
-
-    // Image rotation compensation
-    // The original image is about 10 degrees tilted.
-    point = point.map(p => {
-        return p * Math.cos(15 / 180 * Math.PI);
+    this.photoSphereViewer.on('leave-marker', (event) => {
+      console.log(event);
+      event.$el.className = event.$el.className.replace(/\s?hovered/, '');
     });
-    // point[0] = this.rotate(point, deltaPitch > 0 ? 10 : -10)[0];
-    point[1] = this.rotate(point, deltaYaw > 0 ? -10 : 10)[1];
-
-    // point[0] = 1.05;
-    const left = this._width / 2 + point[0] * this._width / 2;
-    const top = this._height / 2 + point[1] * this._height / 2;
-
-    //hotspot.style.transform = "translate(" + left + "px, " + top + "px) translate(-50%, -50%)";
-    hotspot.style.transform = `translate3d(${left}px, ${top}px, 0) rotate(45deg)`;
   }
 
-  setHotspotOffsets() {
-    this.hotspots.forEach(hotspot => this.setHotspotOffset(hotspot));
+  createBody(parent) {
+    const el = document.createElement('div');
+    el.className = 'panorama-banner__body';
+    parent.appendChild(el);
+    return el;
+  }
+
+  getMarkers() {
+    console.log(this.$el.querySelectorAll('.panorama-banner__marker'));
+    return Array.prototype.slice.call(this.$el.querySelectorAll('.panorama-banner__marker-html')).map((marker, index) => {
+      console.log('getMarkers:', marker, index);
+      return {
+        id: `marker-${index}`,
+        latitude: parseFloat(marker.dataset.latitude),
+        longitude: parseFloat(marker.dataset.longitude),
+        x: parseFloat(marker.dataset.x),
+        y: parseFloat(marker.dataset.y),
+        html: `<div class="panorama-banner__marker">${index + 1}</div>`,
+        anchor: 'bottom right',
+        hoveringMarker: this.onOverMarker.bind(this),
+        selectMarker: (event) => {console.log(event)},
+      };
+    });
+  }
+
+  onOverMarker(event) {
+    console.log('onOverMarker:', event);
   }
 }
 
+
 document.addEventListener('DOMContentLoaded', (event) => {
-  window.panoViewer = new PanoramaBanner(
-    document.querySelector('.panoviewer__banner'), {
-    useZoom: false,
-    showPolePoint: true,
-    hotspots: document.querySelectorAll('.hotspot'),
-    projectionType: PanoViewer.PROJECTION_TYPE.CUBEMAP
+  window.panoramaViewer = new PanoramaBanner('.panorama-banner', {
+    navbar: false,
+    time_anim: false,
+    markers: [
+      {id: 'dewd', latitude: 0, longitude: 0, html: '<div class="panorama-banner__marker">@</b>'}
+    ]
   });
 });
