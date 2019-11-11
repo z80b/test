@@ -1,4 +1,5 @@
-import PhotoSphereViewer from 'photo-sphere-viewer';
+import LamodaPanoramaViewer from '@js/lamoda-panorama-viewer';
+//import 'three/examples/js/controls/DeviceOrientationControls.js';
 import 'photo-sphere-viewer/src/scss/photo-sphere-viewer.scss';
 import '@css/index.styl';
 
@@ -20,7 +21,8 @@ class PanoramaBanner {
     //   },
     // ];
     console.log('constructor:', options);
-    this.photoSphereViewer = new PhotoSphereViewer(options);
+    this.photoSphereViewer = new LamodaPanoramaViewer(options);
+    //this.photoSphereViewer.toggleDeviceOrientation();
     this.photoSphereViewer.on('over-marker', (event) => {
       console.log(event);
       event.$el.className += ' hovered';
@@ -63,6 +65,7 @@ class PanoramaBanner {
 
 
 document.addEventListener('DOMContentLoaded', (event) => {
+  
   window.panoramaViewer = new PanoramaBanner('.panorama-banner', {
     navbar: false,
     time_anim: false,
