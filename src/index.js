@@ -10,6 +10,9 @@ class PanoramaBanner {
     options.panorama = this.$el.getAttribute('data-image');
     options.markers = [...options.markers, ...this.getMarkers()];
     options.hoveringMarker = this.onOverMarker.bind(this);
+    options.onready = (e) => {
+      console.log('onready:',e);
+    };
     // options.markers = [
     //   {
     //     // html marker with custom style
