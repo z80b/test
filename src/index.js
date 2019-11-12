@@ -1,5 +1,6 @@
-import LamodaPanoramaViewer from '@js/lamoda-panorama-viewer';
-//import 'three/examples/js/controls/DeviceOrientationControls.js';
+// import LamodaPanoramaViewer from '@js/lamoda-panorama-viewer';
+import PhotoSphereViewer from 'photo-sphere-viewer';
+// import 'three/examples/js/controls/DeviceOrientationControls.js';
 import 'photo-sphere-viewer/src/scss/photo-sphere-viewer.scss';
 import '@css/index.styl';
 
@@ -10,9 +11,7 @@ class PanoramaBanner {
     options.panorama = this.$el.getAttribute('data-image');
     options.markers = [...options.markers, ...this.getMarkers()];
     options.hoveringMarker = this.onOverMarker.bind(this);
-    options.onready = (e) => {
-      console.log('onready:',e);
-    };
+    options.gyroscoop = true;
     // options.markers = [
     //   {
     //     // html marker with custom style
@@ -24,8 +23,10 @@ class PanoramaBanner {
     //   },
     // ];
     console.log('constructor:', options);
-    this.photoSphereViewer = new LamodaPanoramaViewer(options);
+    console.log('PhotoSphereViewer:', PhotoSphereViewer);
+    window.PSV = this.photoSphereViewer = new PhotoSphereViewer(options);
     //this.photoSphereViewer.toggleDeviceOrientation();
+    this.photoSphereViewer.on('ready', this.onPanoramaReady.bind(this));
     this.photoSphereViewer.on('over-marker', (event) => {
       console.log(event);
       event.$el.className += ' hovered';
@@ -34,6 +35,11 @@ class PanoramaBanner {
       console.log(event);
       event.$el.className = event.$el.className.replace(/\s?hovered/, '');
     });
+  }
+
+  onPanoramaReady(event) {
+    console.log('onReady', event, this);
+    this.photoSphereViewer.startGyroscopeControl();
   }
 
   createBody(parent) {
