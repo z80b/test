@@ -11,7 +11,7 @@ const overrideBrowserslist = [
 ];
 
 module.exports = {
-  mode: process.env.NODE_ENV,
+  mode: process.env.NODE_ENV || 'development',
   node: false,
 
   entry: __dirname + "/src/index.js",  // webpack entry point. Module to start building dependency graph
@@ -49,6 +49,7 @@ module.exports = {
               [
                 "@babel/preset-env", {
                   targets: "> 0.25%, not dead",
+                  corejs: "3.4.1",
                   useBuiltIns: 'usage',
                   modules: false
                }

@@ -52,7 +52,7 @@ var DeviceOrientationControls = function ( object ) {
 
 		return function ( quaternion, alpha, beta, gamma, orient ) {
 
-			euler.set( beta, alpha, - gamma, 'YXZ' ); // 'ZXY' for the device, but 'YXZ' for us
+			euler.set(90, alpha, - gamma, 'YXZ' ); // 'ZXY' for the device, but 'YXZ' for us
 
 			quaternion.setFromEuler( euler ); // orient the device
 

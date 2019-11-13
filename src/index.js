@@ -1,5 +1,6 @@
 // import LamodaPanoramaViewer from '@js/lamoda-panorama-viewer';
 import PhotoSphereViewer from 'photo-sphere-viewer';
+//import iOsVersion from 'ios-version';
 // import 'three/examples/js/controls/DeviceOrientationControls.js';
 import 'photo-sphere-viewer/src/scss/photo-sphere-viewer.scss';
 import '@css/index.styl';
@@ -7,39 +8,85 @@ import '@css/index.styl';
 class PanoramaBanner {
   constructor(el, options = {}) {
     this.$el = typeof(el) == 'string' ? document.querySelector(el) : el;
+    this.accessButton = this.$el.querySelector('.panorama-banner__access-button');
+    this.accessButton.addEventListener('click', this.onClickRequestPermissions.bind(this), false);
     options.container = this.createBody(this.$el);
     options.panorama = this.$el.getAttribute('data-image');
-    options.markers = [...options.markers, ...this.getMarkers()];
+    options.markers = [...options.markers || [], ...this.getMarkers()];
     options.hoveringMarker = this.onOverMarker.bind(this);
     options.gyroscoop = true;
-    // options.markers = [
-    //   {
-    //     // html marker with custom style
-    //     id: 'text',
-    //     longitude: 0,
-    //     latitude: 0,
-    //     html: '<div class="panorama-banner__marker">1</div>',
-    //     anchor: 'bottom right',
-    //   },
-    // ];
-    console.log('constructor:', options);
-    console.log('PhotoSphereViewer:', PhotoSphereViewer);
-    window.PSV = this.photoSphereViewer = new PhotoSphereViewer(options);
-    //this.photoSphereViewer.toggleDeviceOrientation();
+
+    this.photoSphereViewer = new PhotoSphereViewer(options);
+
     this.photoSphereViewer.on('ready', this.onPanoramaReady.bind(this));
     this.photoSphereViewer.on('over-marker', (event) => {
-      console.log(event);
       event.$el.className += ' hovered';
     });
     this.photoSphereViewer.on('leave-marker', (event) => {
-      console.log(event);
       event.$el.className = event.$el.className.replace(/\s?hovered/, '');
     });
   }
 
-  onPanoramaReady(event) {
-    console.log('onReady', event, this);
+  async onClickRequestPermissions() {
+    let orientationRespone = '';
+    let motionRespone = '';
+
+    if (DeviceMotionEvent && DeviceMotionEvent.requestPermission) {
+      motionRespone = await DeviceMotionEvent.requestPermission();
+    } motionRespone = 'granted'
+
+    if (DeviceOrientationEvent && DeviceOrientationEvent.requestPermission) {
+      orientationRespone = await DeviceOrientationEvent.requestPermission();
+    }
+
+    if (motionRespone == 'granted' && orientationRespone == 'granted') {
+      this.accessButton.innerText = 'Права предоставлены';
+      this.startGyroscopeControl();
+    } else this.accessButton.innerText = 'Невозможно включить сенсор положения';
+
+    setTimeout(() => {
+      this.accessButton.style.display = 'none';
+    }, 2000);
+  }
+
+  async onPanoramaReady(event) {
+    const scope = this;
+    let accelerometerPermissions = { state: 'denied' };
+    let gyroscopePermissions = { state: 'denied' };
+
+    if (navigator.permissions && navigator.permissions.query) {
+      accelerometerPermissions = await navigator.permissions.query({ name: 'accelerometer' });
+      gyroscopePermissions = await navigator.permissions.query({ name: 'gyroscope' });
+
+      if (accelerometerPermissions.state === 'granted' && gyroscopePermissions.state === 'granted') {
+        this.startGyroscopeControl();
+      } else if (accelerometerPermissions.state !== 'denied' && gyroscopePermissions.state !== 'denied') {
+        this.accessButton.style.display = 'block';
+      } else {
+        console.log('Невозможно включить сенсор положения програмно');
+      }
+    }
+  }
+
+  iOSversion() {
+    let d, v;
+    if (/iP(hone|od|ad)/.test(navigator.platform)) {
+      v = (navigator.appVersion).match(/OS (\d+)_(\d+)_?(\d+)?/);
+      d = {
+        status: true,
+        version: parseInt(v[1], 10) , 
+        info: parseInt(v[1], 10)+'.'+parseInt(v[2], 10)+'.'+parseInt(v[3] || 0, 10)
+      };
+    }else{
+      d = {status:false, version: false, info:''}
+    }
+    return d;
+  }
+
+  startGyroscopeControl() {
+    console.log('startGyroscopeControl');
     this.photoSphereViewer.startGyroscopeControl();
+    this.photoSphereViewer.unlockOrientation();
   }
 
   createBody(parent) {
@@ -50,7 +97,6 @@ class PanoramaBanner {
   }
 
   getMarkers() {
-    console.log(this.$el.querySelectorAll('.panorama-banner__marker'));
     return Array.prototype.slice.call(this.$el.querySelectorAll('.panorama-banner__marker-html')).map((marker, index) => {
       console.log('getMarkers:', marker, index);
       return {
@@ -59,7 +105,7 @@ class PanoramaBanner {
         longitude: parseFloat(marker.dataset.longitude),
         x: parseFloat(marker.dataset.x),
         y: parseFloat(marker.dataset.y),
-        html: `<div class="panorama-banner__marker">${index + 1}</div>`,
+        html: `<a class="panorama-banner__marker" href="${marker.dataset.href}"></a>`,
         anchor: 'bottom right',
         hoveringMarker: this.onOverMarker.bind(this),
         selectMarker: (event) => {console.log(event)},
@@ -78,8 +124,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
   window.panoramaViewer = new PanoramaBanner('.panorama-banner', {
     navbar: false,
     time_anim: false,
-    markers: [
-      {id: 'dewd', latitude: 0, longitude: 0, html: '<div class="panorama-banner__marker">@</b>'}
-    ]
+    latitude_range: [0, 0],
   });
 });

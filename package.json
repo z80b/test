@@ -5,14 +5,16 @@
   "scripts": {
     "start": "npm run dev & npm run server",
     "server": "node server.js",
-    "dev": "webpack --mode=development",
-    "build": "webpack --mode=production"
+    "dev": "webpack --mode development",
+    "build": "webpack --mode production"
   },
   "author": "Stitch",
   "license": "ISC",
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
     "@egjs/view360": "^3.2.2",
+    "core-js": "^3.4.1",
+    "ios-version": "^1.0.1",
     "photo-sphere-viewer": "^3.5.1"
   },
   "devDependencies": {

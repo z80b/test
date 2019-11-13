@@ -1,19 +1,22 @@
 .panorama-banner
+  position relative
+
   &__body
     width 100%
-    height 600px
+    height 100vh
 
     .psv-canvas
       width 100%
       height 600px
 
   &__marker
-    width 20px
-    height 20px
-    border solid 2px #fff
+    display block
+    width 17px
+    height 17px
+    border solid 5px #fff
     border-radius 50%
+    background-color #00174f
     text-align center
-    line-height 20px
     color #fff
     transition .5s transform ease
 
@@ -23,3 +26,20 @@
 
     &-html
       display none
+
+  &__access-button
+    display none
+    position absolute
+    bottom 2em
+    left 20%
+    right 20%
+    width 60%
+    padding 8%
+    border none
+    border-radius 1em
+    background-image linear-gradient(120deg, #e0c3fc 0%, #8ec5fc 100%)
+    color #1c2172
+    font-size 1em
+    font-weight 700
+    text-align center
+    z-index 100
